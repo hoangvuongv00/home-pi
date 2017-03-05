@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Welcome to HOME PI</title>
+    <style media="screen">
+      body {
+        font-family: Roboto, Calibri, sans-serif;
+        background: #ECEFF1;
+        color: rgba(0,0,0,0.87);
+      }
+
+        .switch {
+          position: relative;
+          display: inline-block;
+          width: 60px;
+          height: 34px;
+        }
+
+        .switch input {display:none;}
+
+        .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          -webkit-transition: .4s;
+          transition: .4s;
+        }
+
+        .slider:before {
+          position: absolute;
+          content: "";
+          height: 26px;
+          width: 26px;
+          left: 4px;
+          bottom: 4px;
+          background-color: white;
+          -webkit-transition: .4s;
+          transition: .4s;
+        }
+
+        input:checked + .slider {
+          background-color: #2196F3;
+        }
+
+        input:focus + .slider {
+          box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+          -webkit-transform: translateX(26px);
+          -ms-transform: translateX(26px);
+          transform: translateX(26px);
+        }
+
+        /* Rounded sliders */
+        .slider.round {
+          border-radius: 34px;
+        }
+
+        .slider.round:before {
+          border-radius: 50%;
+        }
+
+    </style>
+  </head>
+  <body>
+    <div>
+      <h1>Welcome to HOME PI</h1>
+      <div>
+      	<p id="textArea1">off</p>
+      	<p id="textArea2">off</p>
+      </div>
+    </div>
+
+    <div onclick='handleClick(this);'>
+		<label class="switch">
+		  <input id="checkbox1" type="checkbox">
+		  <div class="slider round"></div>
+		</label>
+		<label class="switch">
+		  <input id="checkbox2" type="checkbox">
+		  <div class="slider round"></div>
+		</label>
+    </div>
+    <div>
+      	<p id="textArea3">Nothing changed.</p>
+      </div>
+  </body>
+</html>
+
+<script src="https://www.gstatic.com/firebasejs/3.6.8/firebase.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBTgHacQszdKfn0TxxYcX-TuM3VI7sm0Gg",
+    authDomain: "home-pi-ccd35.firebaseapp.com",
+    databaseURL: "https://home-pi-ccd35.firebaseio.com",
+    storageBucket: "home-pi-ccd35.appspot.com",
+    messagingSenderId: "282276220501"
+  };
+  firebase.initializeApp(config);
+
+    // Get a reference to the database service
+    var database = firebase.database();
+    var dbLight = database.ref().child('light');
+    var dbFan = database.ref().child('fan');
+   
+    dbLight.on('value', function(snapshot) {
+  		var light = document.getElementById("textArea1").innerHTML = snapshot.val();
+  		if (light == "on") 
+  			$("#checkbox1").prop("checked", true);
+  		else
+  			$("#checkbox1").prop("checked", false);
+	});
+
+	dbFan.on('value', function(snapshot) {
+  		var fan = document.getElementById("textArea2").innerHTML = snapshot.val();
+  		if (fan == "on") 
+  			$("#checkbox2").prop("checked", true);
+  		else
+  			$("#checkbox2").prop("checked", false);
+	});
+
+    function handleClick(cb) {
+  		if ($('#checkbox1').is(":checked"))
+		{
+		  dbLight.set('on');
+		}
+		else
+		{
+		  dbLight.set('off');
+		}
+		if ($('#checkbox2').is(":checked"))
+		{
+		  dbFan.set('on');
+		}
+		else
+		{
+		  dbFan.set('off');
+		}
+		document.getElementById("textArea3").innerHTML = "the value has been changed.";
+	}
+
+	var pi_update = firebase.database().ref('pi-update/');
+	pi_update.on('child_added', function(data) {
+		console.log(data.key);
+		console.log(data.val().light);
+		console.log(data.val().fan);
+		dbLight.set(data.val().light);
+		dbFan.set(data.val().fan);
+	});
+
+ 
+
+</script>
